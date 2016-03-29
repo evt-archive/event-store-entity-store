@@ -94,7 +94,10 @@ module EventStore
         raise InvalidSubjectError unless writable?(subject)
       end
 
-      class << self
+      class << self   
+        extend Virtual::Macro
+        include Virtual::Macro
+
         virtual :readable? do |subject|
           true
         end

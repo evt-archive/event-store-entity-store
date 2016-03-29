@@ -8,6 +8,7 @@ module EventStore
       cls.extend Logger
       cls.extend Configure
       cls.extend Build
+      cls.extend Virtual::Macro
 
       cls.send :include, EventStore::Messaging::StreamName
       cls.send :dependency, :cache, EntityStore::Cache
