@@ -18,6 +18,14 @@ module EventStore
           SomeStore.build(cache_scope: cache_scope)
         end
 
+        class IncompleteApplicationStore
+          include EventStore::EntityStore
+
+          category Controls::Store.category
+          entity Controls::Entity.entity_class
+          projection Controls::Projection::IncompleteApplication
+        end
+
         module Anomaly
           module StreamDoesntExist
             class SomeStore
