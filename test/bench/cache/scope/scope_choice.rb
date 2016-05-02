@@ -19,11 +19,6 @@ context "Select Cache Scope Implementation" do
 end
 
 context "Default Cache Scope Implementation" do
-  test "Shared" do
-    cache = EventStore::EntityStore::Cache::Factory.build_cache :some_subject
-    assert(cache.is_a? EventStore::EntityStore::Cache::Scope::Shared)
-  end
-
   test "Can be specified with the ENTITY_CACHE environment variable" do
     saved_cache_setting = EventStore::EntityStore::Cache::Scope::Defaults::Name.env_var_value
 

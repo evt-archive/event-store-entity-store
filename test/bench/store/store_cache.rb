@@ -17,10 +17,3 @@ context "Store's Cache Scope" do
     end
   end
 end
-
-context "Default Cache Scope Implementation" do
-  test "Shared" do
-    store = EventStore::EntityStore::Controls::Store.example
-    assert(store.cache.is_a? EventStore::EntityStore::Cache::Scope::Shared)
-  end
-end
