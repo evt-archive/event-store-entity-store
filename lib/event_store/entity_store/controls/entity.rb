@@ -2,6 +2,10 @@ module EventStore
   module EntityStore
     module Controls
       module Entity
+        def self.example
+          Current.example
+        end
+
         class Example
           include Schema::DataStructure
 

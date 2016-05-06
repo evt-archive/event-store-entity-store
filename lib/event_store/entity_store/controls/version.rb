@@ -2,6 +2,10 @@ module EventStore
   module EntityStore
     module Controls
       module Version
+        def self.example
+          Current.example
+        end
+
         module NotCached
           def self.example
             nil

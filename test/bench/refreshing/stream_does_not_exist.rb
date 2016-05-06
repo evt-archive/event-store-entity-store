@@ -12,7 +12,7 @@ context "Refreshing non existent entity" do
     assert entity == nil
   end
 
-  test "Indicates no stream exists" do
+  test "Version indicates no stream exists" do
     assert version == EntityCache::Record::NoStream.version
   end
 
