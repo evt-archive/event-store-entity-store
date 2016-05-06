@@ -1,8 +1,6 @@
 require_relative './bench_init'
 
-context "Entity has not yet been stored in cache" do
-  id = Controls::ID.get
-
+context "Initializing an entity" do
   context "Factory method is defined on the entity class" do
     entity_class = Class.new do
       attr_accessor :build_called
@@ -16,7 +14,7 @@ context "Entity has not yet been stored in cache" do
 
     store = EventStore::EntityStore::Controls::Store.example entity_class: entity_class
 
-    entity = store.get id
+    entity = store.new_entity
 
     test "Factory method is used" do
       assert entity.build_called
@@ -28,7 +26,7 @@ context "Entity has not yet been stored in cache" do
 
     store = EventStore::EntityStore::Controls::Store.example entity_class: entity_class
 
-    entity = store.get id
+    entity = store.new_entity
 
     test "Entity is instantiated" do
       assert entity.is_a?(entity_class)

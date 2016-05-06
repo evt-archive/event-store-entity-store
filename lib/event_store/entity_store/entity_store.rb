@@ -18,14 +18,15 @@ module EventStore
       logger.debug "Retrieving entity (ID: #{id.inspect}, Entity Class: #{entity_class.name.inspect}, Include: #{include.inspect})"
 
       record = cache.get_record id
-      record.entity ||= new_entity
 
-      current_version = refresh record.entity, id, record.version
+      entity = record.entity || new_entity
+
+      current_version = refresh entity, id, record.version
 
       unless current_version.nil?
         record = cache.put(
           id,
-          record.entity,
+          entity,
           current_version,
           record.persisted_version,
           record.persisted_time

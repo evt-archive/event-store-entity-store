@@ -6,11 +6,19 @@ context "Refreshing non existent entity" do
   store = EventStore::EntityStore::Controls::Store.example
   SubstAttr::Substitute.(:cache, store)
 
-  context "Version" do
-    _, version = store.get id, include: :version
+  entity, version = store.get id, include: :version
 
-    test "Indicates no stream exists" do
-      assert version == EntityCache::Record::NoStream.version
+  test "Entity is nil" do
+    assert entity == nil
+  end
+
+  test "Indicates no stream exists" do
+    assert version == EntityCache::Record::NoStream.version
+  end
+
+  test "Entity is not cached" do
+    refute store.cache do
+      put?
     end
   end
 end
