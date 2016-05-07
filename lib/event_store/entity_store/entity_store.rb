@@ -38,6 +38,11 @@ module EventStore
       record.destructure include
     end
 
+    def get_version(id)
+      _, version = get id, include: :version
+      version
+    end
+
     def new_entity
       if entity_class.respond_to? :build
         entity_class.build

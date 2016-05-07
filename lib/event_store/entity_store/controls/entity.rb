@@ -26,6 +26,8 @@ module EventStore
             version = Version::Cached.example
 
             store.cache.add id, entity, version, persisted_version: version
+
+            return entity, version
           end
 
           def self.sum
