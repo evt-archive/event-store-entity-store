@@ -15,7 +15,7 @@ module EventStore
     end
 
     def get(id, include: nil)
-      logger.debug "Retrieving entity (ID: #{id.inspect}, Entity Class: #{entity_class.name.inspect}, Include: #{include.inspect})"
+      logger.trace "Getting entity (ID: #{id.inspect}, Entity Class: #{entity_class.name.inspect}, Include: #{include.inspect})"
 
       record = cache.get_record id
 
@@ -33,7 +33,7 @@ module EventStore
         )
       end
 
-      logger.trace "Retrieved entity (ID: #{id.inspect}, Entity Class: #{entity_class.name.inspect}, Include: #{include.inspect}, Version: #{record.version.inspect}, Time: #{record.time})"
+      logger.debug "Get entity done (ID: #{id.inspect}, Entity Class: #{entity_class.name.inspect}, Include: #{include.inspect}, Version: #{record.version.inspect}, Time: #{record.time})"
 
       record.destructure include
     end
