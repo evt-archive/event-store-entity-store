@@ -9,7 +9,11 @@ module EventStore
         def get(id, include: nil)
           record = records[id]
 
-          record.destructure include
+          if record
+            record.destructure include
+          else
+            EntityCache::Record::NoStream.destructure include
+          end
         end
 
         def add(id, entity, version=nil)
@@ -21,9 +25,7 @@ module EventStore
         end
 
         def records
-          @records ||= Hash.new do |hash, id|
-            hash[id] = EntityCache::Record.missing id
-          end
+          @records ||= {}
         end
       end
     end

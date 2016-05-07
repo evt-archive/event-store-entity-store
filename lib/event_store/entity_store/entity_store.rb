@@ -17,25 +17,36 @@ module EventStore
     def get(id, include: nil)
       logger.trace "Getting entity (ID: #{id.inspect}, Entity Class: #{entity_class.name.inspect}, Include: #{include.inspect})"
 
-      record = cache.get_record id
+      record = cache.get id
 
-      entity = record.entity || new_entity
+      if record
+        entity = record.entity
+        version = record.version
+        persisted_version = record.persisted_version
+        persisted_time = record.persisted_time
+      else
+        entity = new_entity
+      end
 
-      current_version = refresh entity, id, record.version
+      current_version = refresh entity, id, version
 
       unless current_version.nil?
         record = cache.put(
           id,
           entity,
           current_version,
-          record.persisted_version,
-          record.persisted_time
+          persisted_version: persisted_version,
+          persisted_time: persisted_time
         )
       end
 
-      logger.debug "Get entity done (ID: #{id.inspect}, Entity Class: #{entity_class.name.inspect}, Include: #{include.inspect}, Version: #{record.version.inspect}, Time: #{record.time})"
+      logger.debug "Get entity done (ID: #{id.inspect}, Entity Class: #{entity_class.name.inspect}, Include: #{include.inspect}, Version: #{record&.version.inspect}, Time: #{record&.time.inspect})"
 
-      record.destructure include
+      if record
+        record.destructure include
+      else
+        EntityCache::Record::NoStream.destructure include
+      end
     end
 
     def get_version(id)

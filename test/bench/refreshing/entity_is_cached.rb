@@ -23,8 +23,8 @@ context "Refreshing the entity when no data is cached" do
       control_entity = EventStore::EntityStore::Controls::Entity::Current.example
 
       assert store.cache do
-        put? do |id, entity|
-          id == control_id && entity == control_entity
+        put? do |record|
+          record.id == control_id && record.entity == control_entity
         end
       end
     end
@@ -33,8 +33,8 @@ context "Refreshing the entity when no data is cached" do
       control_version = EventStore::EntityStore::Controls::Version::Current.example
 
       assert store.cache do
-        put? do |id, _, version|
-          id == control_id && version == control_version
+        put? do |record|
+          record.id == control_id && record.version == control_version
         end
       end
     end
@@ -43,8 +43,9 @@ context "Refreshing the entity when no data is cached" do
       control_persisted_version = EventStore::EntityStore::Controls::Version::Cached.example
 
       assert store.cache do
-        put? do |id, _, _, persisted_version|
-          id == control_id && persisted_version == control_persisted_version
+        put? do |record|
+          record.id == control_id &&
+            record.persisted_version == control_persisted_version
         end
       end
     end
