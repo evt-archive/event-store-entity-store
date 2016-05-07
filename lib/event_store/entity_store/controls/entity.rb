@@ -16,12 +16,6 @@ module EventStore
           end
         end
 
-        module NotCached
-          def self.example
-            EventStore::EntityProjection::Controls::Entity.example
-          end
-        end
-
         module Cached
           def self.example
             Example.build :sum => sum
