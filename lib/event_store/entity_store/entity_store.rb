@@ -35,8 +35,8 @@ module EventStore
           id,
           entity,
           current_version,
-          persisted_version: persisted_version,
-          persisted_time: persisted_time
+          persisted_version,
+          persisted_time
         )
       end
 
