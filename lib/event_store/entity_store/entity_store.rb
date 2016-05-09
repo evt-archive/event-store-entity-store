@@ -1,106 +1,53 @@
 module EventStore
   module EntityStore
-    class Error < RuntimeError; end
-
     def self.included(cls)
-      cls.extend EntityMacro
-      cls.extend ProjectionMacro
-      cls.extend Logger
-      cls.extend Configure
-      cls.extend Build
-      cls.extend Virtual::Macro
+      cls.class_exec do
+        configure :store
 
-      cls.send :include, EventStore::Messaging::StreamName
-      cls.send :dependency, :cache, EntityStore::Cache
-      cls.send :dependency, :refresh, EntityStore::Cache::RefreshPolicy
-      cls.send :dependency, :logger, Telemetry::Logger
-      cls.send :dependency, :session, EventStore::Client::HTTP::Session
-      cls.send :virtual, :configure_dependencies
-    end
+        include EventStore::Messaging::StreamName
 
-    module EntityMacro
-      def entity_macro(cls)
-        self.send :define_method, :entity_class do
-          cls
-        end
-      end
-      alias :entity :entity_macro
-    end
+        extend Build
 
-    module ProjectionMacro
-      def projection_macro(cls)
-        self.send :define_method, :projection_class do
-          cls
-        end
-      end
-      alias :projection :projection_macro
-    end
+        extend EntityMacro
+        extend ProjectionMacro
 
-    module Logger
-      def logger
-        @logger ||= Telemetry::Logger.build self
+        dependency :cache, EntityCache
+        dependency :logger, Telemetry::Logger
       end
     end
 
-    module Build
-      def build(cache_scope: nil, refresh: nil, session: nil)
-        new.tap do |instance|
-          EntityStore::Cache.configure instance, instance.entity_class, scope: cache_scope
-          EntityStore::Cache::RefreshPolicy.configure instance, refresh
-          Telemetry::Logger.configure instance
+    def get(id, include: nil)
+      logger.trace "Getting entity (ID: #{id.inspect}, Entity Class: #{entity_class.name.inspect}, Include: #{include.inspect})"
 
-          if session
-            instance.session = session
-          else
-            EventStore::Client::HTTP::Session.configure instance
-          end
+      record = cache.get id
 
-          instance.configure_dependencies
-        end
-      end
-    end
-
-    module Configure
-      def configure(receiver, attr_name=nil, cache_scope: nil, refresh: nil, session: nil)
-        attr_name ||= :store
-        instance = build(cache_scope: cache_scope, refresh: refresh, session: session)
-        receiver.send "#{attr_name}=", instance
-        instance
-      end
-    end
-
-    def category_name=(val)
-      @category_name = val
-    end
-
-    def get(id, include: nil, expected_version: nil, refresh: nil)
-      logger.trace "Getting entity (Class: #{entity_class}, ID: #{id}, Include: #{include})"
-
-      cache_record = refresh_record(id, refresh)
-
-      entity, version = nil
-
-      if cache_record
-        entity = cache_record.entity
-        version = cache_record.version
-      end
-
-      logger.debug "Get entity done: #{EntityStore::LogText.entity(entity)} (ID: #{id}, Version: #{EntityStore::LogText.version(version)}, Include: #{include})"
-
-      unless expected_version.nil?
-        EntityStore.assure_version(expected_version, version)
-      end
-
-      if cache_record
-        return cache_record.destructure(include)
+      if record
+        entity = record.entity
+        version = record.version
+        persisted_version = record.persisted_version
+        persisted_time = record.persisted_time
       else
-        return Cache::Record::NoStream.destructure(include)
+        entity = new_entity
       end
-    end
 
-    def self.assure_version(expected_version, version)
-      unless expected_version == version
-        raise Error, "Expected version #{expected_version} is not the cached version #{version || '(nil)'}"
+      current_version = refresh entity, id, version
+
+      unless current_version.nil?
+        record = cache.put(
+          id,
+          entity,
+          current_version,
+          persisted_version,
+          persisted_time
+        )
+      end
+
+      logger.debug "Get entity done (ID: #{id.inspect}, Entity Class: #{entity_class.name.inspect}, Include: #{include.inspect}, Version: #{record&.version.inspect}, Time: #{record&.time.inspect})"
+
+      if record
+        record.destructure include
+      else
+        EntityCache::Record::NoStream.destructure include
       end
     end
 
@@ -109,98 +56,72 @@ module EventStore
       version
     end
 
-    def refresh_record(id, policy_name=nil)
-      if policy_name.nil?
-        refresh_policy = refresh
+    def new_entity
+      if entity_class.respond_to? :build
+        entity_class.build
       else
-        refresh_policy = EntityStore::Cache::RefreshPolicy.policy_class(policy_name)
-      end
-
-      logger.trace "Refreshing cache record (ID: #{id}, Refresh Policy: #{refresh_policy})"
-
-      stream_name = stream_name(id)
-
-      cache_record = refresh_policy.(id, cache, projection_class, stream_name, entity_class, session)
-
-      logger.debug "Refreshed cache record (ID: #{id}, Refresh Policy: #{refresh_policy})"
-
-      cache_record
-    end
-
-    module LogText
-      def self.entity(entity)
-        if entity.nil?
-          return none
-        else
-          return entity.class.name
-        end
-      end
-
-      def self.version(version)
-        if version.nil?
-          return none
-        else
-          return version
-        end
-      end
-
-      def self.none
-        "(none)"
+        entity_class.new
       end
     end
 
-    module Substitute
-      def self.build
-        store = Store.build refresh: :none
-        store.configure_dependencies
-        store
+    def next_version(version)
+      if version
+        version + 1
+      else
+        nil
       end
+    end
 
-      class Store
-        include EventStore::EntityStore
+    def refresh(entity, id, current_version)
+      stream_name = self.stream_name id
 
-        dependency :uuid, Identifier::UUID::Random
-        dependency :clock, Clock::Local
+      starting_position = next_version current_version
 
-        category ' '
-        entity Object
-        projection Object
+      projection_class.(entity, stream_name, starting_position: starting_position)
+    end
 
-        def configure_dependencies
-          Identifier::UUID::Random.configure self
-          Clock::Local.configure self
+    module Build
+      def build(settings: nil)
+        settings ||= Settings.instance
+
+        instance = new
+
+        persistent_store = settings.get :persistent_store
+        write_behind_delay = settings.get :write_behind_delay
+
+        cache = EntityCache.configure(
+          instance,
+          entity_class,
+          persistent_store: persistent_store,
+          write_behind_delay: write_behind_delay,
+          attr_name: :cache
+        )
+
+        Telemetry::Logger.configure instance
+        instance
+      end
+    end
+
+    module EntityMacro
+      def entity_macro(cls)
+        define_singleton_method :entity_class do
+          cls
         end
 
-        def add(id, entity, version=nil, time=nil)
-          time ||= clock.now
-          logger.info time.inspect
-          cache.put(id, entity, version, time)
-        end
-
-        def merge(entities, version=nil, time=nil)
-          return merge_array(entities, version, time) if entities.is_a?(Array)
-          return merge_hash(entities, version, time) if entities.is_a?(Hash)
-
-          raise ArgumentError, "Merge does not support #{entities.class}"
-        end
-
-        def merge_array(entities, version=nil, time=nil)
-          records = []
-          entities.each do |entity|
-            id = uuid.get
-            records << add(id, entity, version, time)
-          end
-          records
-        end
-
-        def merge_hash(entities, version=nil, time=nil)
-          records = []
-          entities.each do |id, entity|
-            records << add(id, entity, version, time)
-          end
-          records
+        define_method :entity_class do
+          self.class.entity_class
         end
       end
+      alias_method :entity, :entity_macro
+    end
+
+    module ProjectionMacro
+      def projection_macro(cls)
+        define_method :projection_class do
+          cls
+        end
+      end
+      alias_method :projection, :projection_macro
     end
   end
 end

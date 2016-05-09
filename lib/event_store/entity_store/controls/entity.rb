@@ -3,20 +3,46 @@ module EventStore
     module Controls
       module Entity
         def self.example
-          entity = EventStore::EntityProjection::Controls::Entity.example
-
-          entity.some_attribute = Controls::Message.attribute
-          entity.some_time = Controls::Message.time
-
-          entity
+          Current.example
         end
 
-        def self.entity_class
-          EventStore::EntityProjection::Controls::Entity::SomeEntity
+        class Example
+          include Schema::DataStructure
+
+          attribute :sum
+
+          def ==(other)
+            other.is_a?(self.class) && other.sum == sum
+          end
         end
 
-        def self.new
-          entity_class.new
+        module Cached
+          def self.example
+            Example.build :sum => sum
+          end
+
+          def self.add(store, id)
+            entity = self.example
+            version = Version::Cached.example
+
+            store.cache.add id, entity, version, persisted_version: version
+
+            return entity, version
+          end
+
+          def self.sum
+            1
+          end
+        end
+
+        module Current
+          def self.example
+            Example.build :sum => sum
+          end
+
+          def self.sum
+            12
+          end
         end
       end
     end

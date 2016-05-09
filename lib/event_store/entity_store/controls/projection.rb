@@ -1,15 +1,13 @@
 module EventStore
   module EntityStore
     module Controls
-      Projection = EventStore::EntityProjection::Controls::EntityProjection
-
       module Projection
-        class IncompleteApplication
+        class Example
           include EventStore::EntityProjection
-          include EventStore::EntityProjection::Controls::Message
 
-          apply SomeMessage do |message|
-            entity.some_attribute = message.some_attribute
+          apply Message::Example do |message|
+            entity.sum ||= 0
+            entity.sum += message.number
           end
         end
       end
