@@ -2,6 +2,8 @@ module EventStore
   module EntityStore
     def self.included(cls)
       cls.class_exec do
+        configure :store
+
         include EventStore::Messaging::StreamName
 
         extend Build
