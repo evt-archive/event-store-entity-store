@@ -79,9 +79,22 @@ module EventStore
     end
 
     module Build
-      def build
+      def build(settings: nil)
+        settings ||= Settings.instance
+
         instance = new
-        EntityCache.configure instance, entity_class, attr_name: :cache
+
+        persistent_store = settings.get :persistent_store
+        write_behind_delay = settings.get :write_behind_delay
+
+        cache = EntityCache.configure(
+          instance,
+          entity_class,
+          persistent_store: persistent_store,
+          write_behind_delay: write_behind_delay,
+          attr_name: :cache
+        )
+
         Telemetry::Logger.configure instance
         instance
       end
