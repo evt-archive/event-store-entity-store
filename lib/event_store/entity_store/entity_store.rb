@@ -14,6 +14,8 @@ module EventStore
 
         dependency :cache, EntityCache
         dependency :logger, Telemetry::Logger
+
+        attr_writer :category_name
       end
     end
 
