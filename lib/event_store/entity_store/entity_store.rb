@@ -10,6 +10,7 @@ module EventStore
 
         extend EntityMacro
         extend ProjectionMacro
+        extend SnapshotMacro
 
         dependency :cache, EntityCache
         dependency :logger, Telemetry::Logger
@@ -81,18 +82,17 @@ module EventStore
     end
 
     module Build
-      def build(settings: nil)
-        settings ||= Settings.instance
+      def build
+        settings = Settings.instance
 
         instance = new
 
-        persistent_store = settings.get :persistent_store
         write_behind_delay = settings.get :write_behind_delay
 
         cache = EntityCache.configure(
           instance,
           entity_class,
-          persistent_store: persistent_store,
+          persistent_store: snapshot_class,
           write_behind_delay: write_behind_delay,
           attr_name: :cache
         )
@@ -122,6 +122,20 @@ module EventStore
         end
       end
       alias_method :projection, :projection_macro
+    end
+
+    module SnapshotMacro
+      def self.extended(cls)
+        cls.singleton_class.virtual :snapshot_class
+      end
+
+      def snapshot_macro(cls)
+        define_singleton_method :snapshot_class do
+          cls
+        end
+      end
+
+      alias_method :snapshot, :snapshot_macro
     end
   end
 end
