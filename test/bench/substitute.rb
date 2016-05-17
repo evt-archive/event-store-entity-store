@@ -33,4 +33,17 @@ context "Substitute" do
       assert version == control_version
     end
   end
+
+  test "Retrieving version only" do
+    entity = Object.new
+    control_version = EventStore::EntityStore::Controls::Version.example
+
+    store.add id, entity, control_version
+
+    version = store.get_version id
+
+    test "Version is returned" do
+      assert version == control_version
+    end
+  end
 end

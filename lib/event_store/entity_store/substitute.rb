@@ -16,6 +16,11 @@ module EventStore
           end
         end
 
+        def get_version(id)
+          _, version = get id, include: :version
+          version
+        end
+
         def add(id, entity, version=nil)
           version ||= 0
 
