@@ -14,6 +14,7 @@ module EventStore
 
         dependency :cache, EntityCache
         dependency :logger, Telemetry::Logger
+        dependency :session, EventStore::Client::HTTP::Session
 
         attr_writer :category_name
       end
@@ -80,18 +81,18 @@ module EventStore
 
       starting_position = next_version current_version
 
-      projection_class.(entity, stream_name, starting_position: starting_position)
+      projection_class.(entity, stream_name, starting_position: starting_position, session: session)
     end
 
     module Build
-      def build
+      def build(session: nil)
         settings = Settings.instance
 
         instance = new
 
         write_behind_delay = settings.get :write_behind_delay
 
-        cache = EntityCache.configure(
+        EntityCache.configure(
           instance,
           entity_class,
           persistent_store: snapshot_class,
@@ -100,6 +101,8 @@ module EventStore
         )
 
         Telemetry::Logger.configure instance
+        EventStore::Client::HTTP::Session.configure instance, session: session
+
         instance
       end
     end
