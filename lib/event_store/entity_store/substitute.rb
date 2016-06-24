@@ -21,14 +21,14 @@ module EventStore
           version
         end
 
-        def put(id, entity, version=nil)
+        def add(id, entity, version=nil)
           version ||= 0
 
           record = EntityCache::Record.new id, entity, version
 
           records[id] = record
         end
-        alias :add :put
+        alias :put :add
 
         def records
           @records ||= {}
