@@ -1,18 +1,13 @@
-# require_relative '../bench_init'
+require_relative '../bench_init'
 
-# context "Get entity from store" do
-#   stream_name = SecureRandom.hex
+context "Get entity from store for stream that does not exist" do
+  id = SecureRandom.hex
 
-#   id = EventStore::Messaging::StreamName.get_id stream_name
-#   category_name = EventStore::Messaging::StreamName.get_category stream_name
+  store = EventStore::EntityStore::Controls::Store.example
 
-#   store = EventStore::EntityStore::Controls::Store::Example.build
+  entity = store.get id
 
-#   store.category_name = category_name
-
-#   entity = store.get id
-
-#   test "Entity is returned" do
-#     assert entity == EventStore::EntityStore::Controls::Entity.example
-#   end
-# end
+  test "Entity is nil" do
+    assert(entity.nil?)
+  end
+end
