@@ -19,4 +19,4 @@ require 'securerandom'
 require 'test_bench'; TestBench.activate
 require 'event_store/entity_store/controls'
 
-Telemetry::Logger::AdHoc.activate
+require 'pp'
