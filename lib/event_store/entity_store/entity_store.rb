@@ -60,6 +60,10 @@ module EventStore
       version
     end
 
+    def fetch(id)
+      get(id) || new_entity
+    end
+
     def new_entity
       if entity_class.respond_to? :build
         entity_class.build
