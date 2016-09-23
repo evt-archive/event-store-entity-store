@@ -1,6 +1,6 @@
 require_relative '../bench_init'
 
-context "Get, with Includes" do
+context "Get with Includes" do
   stream_name = EventStore::EntityStore::Controls::Writer.write_batch
 
   id = EventStore::Messaging::StreamName.get_id stream_name
