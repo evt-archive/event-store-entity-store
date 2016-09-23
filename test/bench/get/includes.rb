@@ -6,54 +6,50 @@ context "Get with Includes" do
   id = EventStore::Messaging::StreamName.get_id stream_name
   category_name = EventStore::Messaging::StreamName.get_category stream_name
 
-  test "Entity" do
-    store = EventStore::EntityStore::Controls::Store.example
-    store.category_name = category_name
+  store = EventStore::EntityStore::Controls::Store.example
+  store.category_name = category_name
 
+  test "Entity" do
     retrieved_entity, _ = store.get id, include: :id
     assert(!retrieved_entity.nil?)
   end
 
-  test "ID" do
-    store = EventStore::EntityStore::Controls::Store.example
-    store.category_name = category_name
+  context "Individual Includes" do
+    test "ID" do
+      _, id = store.get id, include: :id
+      assert(!id.nil?)
+    end
 
-    _, id = store.get id, include: :id
-    assert(!id.nil?)
+    test "Version" do
+      _, version = store.get id, include: :version
+      assert(!version.nil?)
+    end
+
+    test "Time" do
+      _, time = store.get id, include: :time
+      assert(!time.nil?)
+    end
   end
 
-  test "Version" do
-    store = EventStore::EntityStore::Controls::Store.example
-    store.category_name = category_name
+  context "Permutation of Includes" do
+    includes = [:time, :version, :id]
 
-    _, version = store.get id, include: :version
-    assert(!version.nil?)
-  end
+    [1, 2, 3].each do |n|
+      context "Permutations of #{n}" do
+        permutations = includes.permutation(n).to_a
 
-  test "Time" do
-    store = EventStore::EntityStore::Controls::Store.example
-    store.category_name = category_name
+        permutations.each do |includes|
+          context "#{includes.join(', ')}" do
+            results = store.get id, include: includes
 
-    _, time = store.get id, include: :time
-    assert(!time.nil?)
-  end
-
-  test "Two Includes" do
-    store = EventStore::EntityStore::Controls::Store.example
-    store.category_name = category_name
-
-    _, version, retrieved_id = store.get id, include: [:version, :id]
-    assert(!version.nil?)
-    assert(!retrieved_id.nil?)
-  end
-
-  test "Three Includes" do
-    store = EventStore::EntityStore::Controls::Store.example
-    store.category_name = category_name
-
-    _, time, version, retrieved_id = store.get id, include: [:time, :version, :id]
-    assert(!time.nil?)
-    assert(!version.nil?)
-    assert(!retrieved_id.nil?)
+            includes.each_with_index do |include, i|
+              test "#{include}" do
+                refute(results[i + 1].nil?)
+              end
+            end
+          end
+        end
+      end
+    end
   end
 end

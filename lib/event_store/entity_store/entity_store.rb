@@ -60,8 +60,18 @@ module EventStore
       version
     end
 
-    def fetch(id)
-      get(id) || new_entity
+    def fetch(id, include: nil)
+      res = get(id, include: include)
+
+      if res.nil?
+        res = new_entity
+      end
+
+      if res.is_a?(Array) && res[0].nil?
+        res[0] = new_entity
+      end
+
+      res
     end
 
     def new_entity

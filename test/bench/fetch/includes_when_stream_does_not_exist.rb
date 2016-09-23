@@ -1,33 +1,28 @@
 require_relative '../bench_init'
 
-context "Get with Includes" do
-  stream_name = EventStore::EntityStore::Controls::Writer.write_batch
-
-  id = EventStore::Messaging::StreamName.get_id stream_name
-  category_name = EventStore::Messaging::StreamName.get_category stream_name
-
+context "fetch with Includes" do
   store = EventStore::EntityStore::Controls::Store.example
-  store.category_name = category_name
+  id = SecureRandom.hex
 
   test "Entity" do
     retrieved_entity, _ = store.fetch id, include: :id
-    assert(!retrieved_entity.nil?)
+    refute(retrieved_entity.nil?)
   end
 
   context "Individual Includes" do
     test "ID" do
       _, id = store.fetch id, include: :id
-      assert(!id.nil?)
+      assert(id.nil?)
     end
 
     test "Version" do
       _, version = store.fetch id, include: :version
-      assert(!version.nil?)
+      assert(version == :no_stream)
     end
 
     test "Time" do
       _, time = store.fetch id, include: :time
-      assert(!time.nil?)
+      assert(time.nil?)
     end
   end
 
@@ -44,7 +39,13 @@ context "Get with Includes" do
 
             includes.each_with_index do |include, i|
               test "#{include}" do
-                refute(results[i + 1].nil?)
+                result = results[i + 1]
+
+                if include == :version
+                  assert(result == :no_stream)
+                else
+                  assert(result.nil?)
+                end
               end
             end
           end

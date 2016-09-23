@@ -1,16 +1,18 @@
 require_relative '../bench_init'
 
-context "Fetch returns a newly-constructed entity for stream that does not exist" do
+context "Fetch entity from store for a stream that exists" do
+  stream_name = EventStore::EntityStore::Controls::Writer.write_batch
+
+  id = EventStore::Messaging::StreamName.get_id stream_name
+  category_name = EventStore::Messaging::StreamName.get_category stream_name
+
   store = EventStore::EntityStore::Controls::Store.example
 
-  store.define_singleton_method :new_entity do
-    :new_entity
-  end
+  store.category_name = category_name
 
-  some_id = SecureRandom.hex
-  entity = store.fetch some_id
+  entity = store.fetch id
 
-  test "The store's new entity is returned" do
-    assert(entity == :new_entity)
+  test "Entity is returned" do
+    assert entity == EventStore::EntityStore::Controls::Entity.example
   end
 end
