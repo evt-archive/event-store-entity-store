@@ -1,4 +1,4 @@
-require_relative './bench_init'
+require_relative '../bench_init'
 
 context "Get the version of a stream, ignoring the entity" do
   id = Controls::ID.get
