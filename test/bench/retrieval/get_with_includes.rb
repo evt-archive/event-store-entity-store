@@ -7,7 +7,7 @@ context "Get with Includes" do
   category_name = EventStore::Messaging::StreamName.get_category stream_name
 
   test "Entity" do
-    store = EventStore::EntityStore::Controls::Store::Example.build
+    store = EventStore::EntityStore::Controls::Store.example
     store.category_name = category_name
 
     retrieved_entity, _ = store.get id, include: :id
@@ -15,7 +15,7 @@ context "Get with Includes" do
   end
 
   test "ID" do
-    store = EventStore::EntityStore::Controls::Store::Example.build
+    store = EventStore::EntityStore::Controls::Store.example
     store.category_name = category_name
 
     _, id = store.get id, include: :id
@@ -23,7 +23,7 @@ context "Get with Includes" do
   end
 
   test "Version" do
-    store = EventStore::EntityStore::Controls::Store::Example.build
+    store = EventStore::EntityStore::Controls::Store.example
     store.category_name = category_name
 
     _, version = store.get id, include: :version
@@ -31,7 +31,7 @@ context "Get with Includes" do
   end
 
   test "Time" do
-    store = EventStore::EntityStore::Controls::Store::Example.build
+    store = EventStore::EntityStore::Controls::Store.example
     store.category_name = category_name
 
     _, time = store.get id, include: :time
@@ -39,7 +39,7 @@ context "Get with Includes" do
   end
 
   test "Two Includes" do
-    store = EventStore::EntityStore::Controls::Store::Example.build
+    store = EventStore::EntityStore::Controls::Store.example
     store.category_name = category_name
 
     _, version, retrieved_id = store.get id, include: [:version, :id]
@@ -48,7 +48,7 @@ context "Get with Includes" do
   end
 
   test "Three Includes" do
-    store = EventStore::EntityStore::Controls::Store::Example.build
+    store = EventStore::EntityStore::Controls::Store.example
     store.category_name = category_name
 
     _, time, version, retrieved_id = store.get id, include: [:time, :version, :id]

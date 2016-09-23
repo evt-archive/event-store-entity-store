@@ -6,7 +6,7 @@ context "Get entity from store" do
   id = EventStore::Messaging::StreamName.get_id stream_name
   category_name = EventStore::Messaging::StreamName.get_category stream_name
 
-  store = EventStore::EntityStore::Controls::Store::Example.build
+  store = EventStore::EntityStore::Controls::Store.example
 
   store.category_name = category_name
 
