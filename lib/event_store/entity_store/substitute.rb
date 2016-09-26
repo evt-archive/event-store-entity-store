@@ -6,6 +6,10 @@ module EventStore
       end
 
       class EntityStore
+        include EventStore::EntityStore
+
+        attr_accessor :entity_class
+
         def get(id, include: nil)
           record = records[id]
 
@@ -14,6 +18,10 @@ module EventStore
           else
             EntityCache::Record::NoStream.destructure include
           end
+        end
+
+        def fetch(id, include: nil)
+          new_entity
         end
 
         def get_version(id)
