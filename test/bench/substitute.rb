@@ -3,10 +3,9 @@ require_relative './bench_init'
 context "Substitute" do
   id = Controls::ID.example
 
-  store = SubstAttr::Substitute.build(EventStore::EntityStore::Controls::Store.example_class)
-
   context "Get" do
     context "Entity has not been added" do
+      store = SubstAttr::Substitute.build(EventStore::EntityStore::Controls::Store.example_class)
       entity, version = store.get id, include: :version
 
       test "Entity is nil" do
@@ -22,6 +21,7 @@ context "Substitute" do
       control_entity = EventStore::EntityStore::Controls::Entity.example
       control_version = EventStore::EntityStore::Controls::Version.example
 
+      store = SubstAttr::Substitute.build(EventStore::EntityStore::Controls::Store.example_class)
       store.add id, control_entity, control_version
 
       entity, version = store.get id, include: :version
@@ -39,6 +39,7 @@ context "Substitute" do
       entity = Object.new
       control_version = EventStore::EntityStore::Controls::Version.example
 
+      store = SubstAttr::Substitute.build(EventStore::EntityStore::Controls::Store.example_class)
       store.add id, entity, control_version
 
       version = store.get_version id
@@ -51,6 +52,7 @@ context "Substitute" do
 
   context "Fetch" do
     context "Entity has not been added" do
+      store = SubstAttr::Substitute.build(EventStore::EntityStore::Controls::Store.example_class)
       entity = store.fetch id
 
       test "New entity is returned" do

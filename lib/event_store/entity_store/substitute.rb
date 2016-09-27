@@ -17,10 +17,6 @@ module EventStore
         end
       end
 
-      def fetch(id, include: nil)
-        new_entity
-      end
-
       def get_version(id)
         _, version = get id, include: :version
         version
