@@ -7,20 +7,6 @@ module EventStore
         new
       end
 
-      def self.define(store_class)
-        substitute_class = Class.new(self)
-
-        substitute_class.send :define_method, :entity_class do
-          store_class.entity_class
-        end
-
-        store_class.class_eval do
-          const_set :Substitute, substitute_class
-        end
-
-        substitute_class
-      end
-
       def get(id, include: nil)
         record = records[id]
 
