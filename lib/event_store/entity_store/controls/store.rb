@@ -14,7 +14,7 @@ module EventStore
         end
 
         def self.example_class(category=nil, entity_class=nil, projection_class=nil, snapshot_class=nil)
-          category ||= Category.example
+          category ||= Controls::Store::Category.example
           entity_class ||= Controls::Entity::Example
           projection_class ||= Controls::Projection::Example
 
