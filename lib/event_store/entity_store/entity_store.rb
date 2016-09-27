@@ -2,12 +2,21 @@ module EventStore
   module EntityStore
     def self.included(cls)
       cls.class_exec do
+        substitute_class = Class.new(EntityStore::Substitute)
+
+        substitute_class.send :define_method, :entity_class do
+          cls.entity_class
+        end
+
+        cls.class_eval do
+          const_set :Substitute, substitute_class
+        end
+
         configure :store
 
         include EventStore::Messaging::StreamName
 
         extend Build
-
         extend EntityMacro
         extend ProjectionMacro
         extend SnapshotMacro

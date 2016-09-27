@@ -1,46 +1,56 @@
 module EventStore
   module EntityStore
-    module Substitute
+    class Substitute
+      include EventStore::EntityStore
+
       def self.build
-        EntityStore.new
+        new
       end
 
-      class EntityStore
-        include EventStore::EntityStore
+      def self.define(store_class)
+        substitute_class = Class.new(self)
 
-        attr_accessor :entity_class
-
-        def get(id, include: nil)
-          record = records[id]
-
-          if record
-            record.destructure include
-          else
-            EntityCache::Record::NoStream.destructure include
-          end
+        substitute_class.send :define_method, :entity_class do
+          store_class.entity_class
         end
 
-        def fetch(id, include: nil)
-          new_entity
+        store_class.class_eval do
+          const_set :Substitute, substitute_class
         end
 
-        def get_version(id)
-          _, version = get id, include: :version
-          version
+        substitute_class
+      end
+
+      def get(id, include: nil)
+        record = records[id]
+
+        if record
+          record.destructure include
+        else
+          EntityCache::Record::NoStream.destructure include
         end
+      end
 
-        def add(id, entity, version=nil)
-          version ||= 0
+      def fetch(id, include: nil)
+        new_entity
+      end
 
-          record = EntityCache::Record.new id, entity, version
+      def get_version(id)
+        _, version = get id, include: :version
+        version
+      end
 
-          records[id] = record
-        end
-        alias :put :add
+      def add(id, entity, version=nil)
+        version ||= 0
 
-        def records
-          @records ||= {}
-        end
+        record = EntityCache::Record.new id, entity, version
+
+        records[id] = record
+      end
+      alias :put :add
+
+      def records
+        @records ||= {}
       end
     end
   end

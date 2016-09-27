@@ -1,7 +1,7 @@
 require_relative './bench_init'
 
 context "Substitute" do
-  id = Controls::ID
+  id = Controls::ID.example
 
   store = SubstAttr::Substitute.build(EventStore::EntityStore::Controls::Store.example_class)
 
@@ -55,6 +55,10 @@ context "Substitute" do
 
       test "New entity is returned" do
         refute(entity.nil?)
+      end
+
+      test "Entity's class it the store's entity class" do
+        assert(entity.class == store.entity_class)
       end
     end
   end
