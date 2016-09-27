@@ -24,6 +24,7 @@ module EventStore
         dependency :session, EventStore::Client::HTTP::Session
 
         attr_writer :category_name
+        attr_accessor :new_entity_probe
       end
     end
 
@@ -82,11 +83,17 @@ module EventStore
     end
 
     def new_entity
-      if entity_class.respond_to? :build
+      entity = if entity_class.respond_to? :build
         entity_class.build
       else
         entity_class.new
       end
+
+      unless new_entity_probe.nil?
+        new_entity_probe.(entity)
+      end
+
+      entity
     end
 
     def next_version(version)
