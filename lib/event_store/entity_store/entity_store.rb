@@ -8,9 +8,7 @@ module EventStore
           cls.entity_class
         end
 
-        cls.class_eval do
-          const_set :Substitute, substitute_class
-        end
+        const_set :Substitute, substitute_class
 
         configure :store
 
