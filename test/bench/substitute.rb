@@ -1,7 +1,7 @@
 require_relative './bench_init'
 
 context "Substitute" do
-  id = Controls::ID.example
+  id = EventStore::EntityStore::Controls::ID.example
 
   context "Get" do
     context "Entity has not been added" do

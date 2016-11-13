@@ -1,7 +1,9 @@
+require 'identifier/uuid/controls'
 require 'entity_cache/controls'
 require 'event_store/entity_projection/controls'
 
 require 'event_store/entity_store/controls/entity'
+require 'event_store/entity_store/controls/id'
 require 'event_store/entity_store/controls/message'
 require 'event_store/entity_store/controls/projection'
 require 'event_store/entity_store/controls/snapshot'

@@ -1,7 +1,7 @@
 require_relative '../bench_init'
 
 context "Refreshing non existent entity" do
-  id = Controls::ID.get
+  id = EventStore::EntityStore::Controls::ID.example
 
   store = EventStore::EntityStore::Controls::Store.example
   SubstAttr::Substitute.(:cache, store)
