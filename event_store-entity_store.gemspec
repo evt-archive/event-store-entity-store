@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.2.3'
 
   s.add_runtime_dependency 'schema'
-  s.add_runtime_dependency 'entity_cache'
+  s.add_runtime_dependency 'entity_cache', '~> 0.6'
   s.add_runtime_dependency 'event_store-entity_projection'
 
   s.add_development_dependency 'test_bench'
