@@ -1,4 +1,3 @@
-require 'identifier/uuid/controls'
 require 'entity_cache/controls'
 require 'event_store/entity_projection/controls'
 

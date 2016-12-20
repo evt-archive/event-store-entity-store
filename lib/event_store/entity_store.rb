@@ -1,5 +1,3 @@
-require 'virtual'; Virtual.activate
-
 require 'entity_cache'
 
 require 'event_store/entity_projection'
