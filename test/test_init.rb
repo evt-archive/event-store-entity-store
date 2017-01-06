@@ -11,6 +11,8 @@ ENV['LOGGER'] ||= 'off'
 ENV['LOG_OPTIONAL'] ||= 'on'
 ENV['ENTITY_CACHE_SCOPE'] ||= 'exclusive'
 
+ENV['DISABLE_EVENT_STORE_LEADER_DETECTION'] ||= 'on'
+
 puts RUBY_DESCRIPTION
 
 require_relative '../init.rb'
