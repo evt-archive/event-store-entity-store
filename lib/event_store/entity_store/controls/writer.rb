@@ -5,7 +5,7 @@ module EventStore
         def self.write_batch
           stream_name = Controls::StreamName.get
 
-          writer = EventStore::Messaging::Writer.build
+          writer = ::Messaging::EventStore::Write.build
 
           write_first stream_name, writer
           write_second stream_name, writer
@@ -30,7 +30,7 @@ module EventStore
         end
 
         def self.write(message, stream_name, writer=nil)
-          writer ||= EventStore::Messaging::Writer.build
+          writer ||= ::Messaging::EventStore::Write.build
 
           writer.write message, stream_name
         end

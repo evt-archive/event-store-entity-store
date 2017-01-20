@@ -3,7 +3,7 @@ module EventStore
     module Controls
       module Projection
         class Example
-          include EventStore::EntityProjection
+          include ::EntityProjection
 
           apply Message::Example do |message|
             entity.sum ||= 0

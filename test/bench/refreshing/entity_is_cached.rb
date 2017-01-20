@@ -2,8 +2,8 @@ require_relative '../bench_init'
 
 context "Refreshing the entity when no data is cached" do
   stream_name = EventStore::EntityStore::Controls::Writer.write_batch
-  category = EventStore::Messaging::StreamName.get_category stream_name
-  id = EventStore::Messaging::StreamName.get_id stream_name
+  category = EventSource::StreamName.get_category stream_name
+  id = EventSource::StreamName.get_id stream_name
 
   store = EventStore::EntityStore::Controls::Store.example category: category
   SubstAttr::Substitute.(:cache, store)

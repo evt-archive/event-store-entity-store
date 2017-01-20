@@ -4,8 +4,8 @@ iterations = ENV.fetch('ITERATIONS') { '10' }.to_i
 
 stream_name = EventStore::EntityStore::Controls::Writer.write_batch
 
-category = EventStore::Messaging::StreamName.get_category stream_name
-stream_id = EventStore::Messaging::StreamName.get_id stream_name
+category = EventSource::StreamName.get_category stream_name
+stream_id = EventSource::StreamName.get_id stream_name
 
 entity_store = EventStore::EntityStore::Controls::Store.example category: category
 

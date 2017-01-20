@@ -15,7 +15,7 @@ module EventStore
         end
 
         class Example
-          include EventStore::Messaging::Message
+          include ::Messaging::Message
 
           attribute :number
         end

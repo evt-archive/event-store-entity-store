@@ -12,7 +12,8 @@ module EventStore
 
         configure :store
 
-        include EventStore::Messaging::StreamName
+        include Log::Dependency
+        include ::Messaging::StreamName
 
         extend Build
         extend EntityMacro
@@ -20,10 +21,10 @@ module EventStore
         extend SnapshotMacro
 
         dependency :cache, EntityCache
-        dependency :logger, Telemetry::Logger
-        dependency :session, EventStore::Client::HTTP::Session
+        dependency :session, EventSource::EventStore::HTTP::Session
 
-        attr_writer :category_name
+        attr_writer :category
+        alias_method :category_name=, :category=
         attr_accessor :new_entity_probe
       end
     end
@@ -109,7 +110,22 @@ module EventStore
 
       starting_position = next_version current_version
 
-      projection_class.(entity, stream_name, starting_position: starting_position, session: session)
+      read = EventSource::EventStore::HTTP::Read.build(
+        stream_name,
+        position: starting_position,
+        session: session
+      )
+
+      position = nil
+
+      projection = projection_class.build entity
+
+      read.() do |event_data|
+        position = event_data.position
+        projection.(event_data)
+      end
+
+      position
     end
 
     module Build
@@ -128,8 +144,7 @@ module EventStore
           attr_name: :cache
         )
 
-        Telemetry::Logger.configure instance
-        EventStore::Client::HTTP::Session.configure instance, session: session
+        EventSource::EventStore::HTTP::Session.configure instance, session: session
 
         instance
       end
