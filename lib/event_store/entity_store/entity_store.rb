@@ -2,7 +2,10 @@ module EventStore
   module EntityStore
     def self.included(cls)
       cls.class_exec do
-        substitute_class = Class.new(Substitute)
+        include ::EntityStore::Log::Dependency
+        include ::Messaging::StreamName
+
+        substitute_class = Class.new(::EntityStore::Substitute)
 
         substitute_class.send :define_method, :entity_class do
           cls.entity_class
@@ -10,22 +13,28 @@ module EventStore
 
         const_set :Substitute, substitute_class
 
-        configure :store
-
-        include Log::Dependency
-        include ::Messaging::StreamName
-
-        extend Build
-        extend EntityMacro
-        extend ProjectionMacro
-        extend SnapshotMacro
+        attr_accessor :session
+        attr_accessor :new_entity_probe
 
         dependency :cache, EntityCache
-        dependency :session, EventSource::EventStore::HTTP::Session
+
+        configure :store
+
+        virtual :category
+        virtual :reader_class
+        virtual :projection_class
+        virtual :snapshot_class
+        virtual :snapshot_interval
+
+        extend Build
+        extend ::EntityStore::EntityMacro
+        extend ::EntityStore::ProjectionMacro
+        extend ::EntityStore::ReaderMacro
+        extend SnapshotMacro
+
+        reader EventSource::EventStore::HTTP::Read
 
         attr_writer :category
-        alias_method :category_name=, :category=
-        attr_accessor :new_entity_probe
       end
     end
 
@@ -148,28 +157,6 @@ module EventStore
 
         instance
       end
-    end
-
-    module EntityMacro
-      def entity_macro(cls)
-        define_singleton_method :entity_class do
-          cls
-        end
-
-        define_method :entity_class do
-          self.class.entity_class
-        end
-      end
-      alias_method :entity, :entity_macro
-    end
-
-    module ProjectionMacro
-      def projection_macro(cls)
-        define_method :projection_class do
-          cls
-        end
-      end
-      alias_method :projection, :projection_macro
     end
 
     module SnapshotMacro

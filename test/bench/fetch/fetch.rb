@@ -6,11 +6,11 @@ context "Fetch entity from store for a stream that exists" do
   comment "Stream Name: #{stream_name}"
 
   id = EventSource::StreamName.get_id stream_name
-  category_name = EventSource::StreamName.get_category stream_name
+  category = EventSource::StreamName.get_category stream_name
 
   store = EventStore::EntityStore::Controls::Store.example
 
-  store.category_name = category_name
+  store.category = category
 
   entity = store.fetch id
 

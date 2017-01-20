@@ -4,10 +4,10 @@ context "Get with Includes" do
   stream_name = EventStore::EntityStore::Controls::Writer.write_batch
 
   id = EventSource::StreamName.get_id stream_name
-  category_name = EventSource::StreamName.get_category stream_name
+  category = EventSource::StreamName.get_category stream_name
 
   store = EventStore::EntityStore::Controls::Store.example
-  store.category_name = category_name
+  store.category = category
 
   test "Entity" do
     retrieved_entity, _ = store.get id, include: :id
